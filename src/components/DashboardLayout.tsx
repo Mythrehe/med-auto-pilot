@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 interface DashboardLayoutProps {
   children: ReactNode;
-  role: "patient" | "provider" | "admin";
+  role: "patient" | "doctor" | "admin";
 }
 
 const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {

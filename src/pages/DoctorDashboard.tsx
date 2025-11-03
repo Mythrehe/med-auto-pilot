@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Calendar, Clock, Users, CheckCircle } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 
-const ProviderDashboard = () => {
+const DoctorDashboard = () => {
   const todayAppointments = [
     { id: 1, patient: "John Smith", time: "09:00 AM", type: "Follow-up", status: "completed" },
     { id: 2, patient: "Emma Wilson", time: "10:30 AM", type: "New Patient", status: "in-progress" },
@@ -10,10 +10,10 @@ const ProviderDashboard = () => {
   ];
 
   return (
-    <DashboardLayout role="provider">
+    <DashboardLayout role="doctor">
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Provider Dashboard</h1>
+          <h1 className="text-3xl font-bold mb-2">Doctor Dashboard</h1>
           <p className="text-muted-foreground">Manage your schedule and patient appointments</p>
         </div>
 
@@ -115,4 +115,4 @@ const ProviderDashboard = () => {
   );
 };
 
-export default ProviderDashboard;
+export default DoctorDashboard;

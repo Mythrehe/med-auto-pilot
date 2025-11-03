@@ -42,7 +42,7 @@ const AdminDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Activity className="w-5 h-5 text-secondary" />
-                Providers
+                Doctors
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -75,7 +75,7 @@ const AdminDashboard = () => {
               <div className="space-y-4">
                 {[
                   { event: "New appointment booked", time: "2 minutes ago", type: "success" },
-                  { event: "Provider schedule updated", time: "15 minutes ago", type: "info" },
+                  { event: "Doctor schedule updated", time: "15 minutes ago", type: "info" },
                   { event: "AI auto-filled cancellation", time: "1 hour ago", type: "success" },
                   { event: "Patient registered", time: "2 hours ago", type: "info" },
                 ].map((item, index) => (
@@ -104,7 +104,7 @@ const AdminDashboard = () => {
                   <p className="text-sm text-muted-foreground">AI reminders reduced no-shows by 35% this month.</p>
                 </div>
                 <div className="p-4 rounded-lg bg-secondary/10 border-2 border-secondary/20">
-                  <h4 className="font-semibold text-secondary mb-2">Provider Utilization</h4>
+                  <h4 className="font-semibold text-secondary mb-2">Doctor Utilization</h4>
                   <p className="text-sm text-muted-foreground">Dr. Johnson has 8 available slots this week.</p>
                 </div>
               </div>
