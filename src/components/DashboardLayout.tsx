@@ -1,7 +1,11 @@
-import { ReactNode } from "react";
-import { Button } from "@/components/ui/button";
-import { Calendar, LogOut, Settings, LayoutDashboard } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ReactNode, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Calendar, Menu } from "lucide-react";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { PatientSidebar } from "@/components/PatientSidebar";
+import { DoctorSidebar } from "@/components/DoctorSidebar";
+import { AdminSidebar } from "@/components/AdminSidebar";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -9,12 +13,74 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
+  const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    // Check authentication
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        navigate("/auth");
+      } else {
+        setIsAuthenticated(true);
+        // Verify user has the correct role
+        verifyUserRole(session.user.id);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT" || !session) {
+        navigate("/auth");
+      } else {
+        setIsAuthenticated(true);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  const verifyUserRole = async (userId: string) => {
+    try {
+      const { data: userRole, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .single();
+
+      if (error) throw error;
+
+      // Redirect if user doesn't have the correct role
+      if (userRole.role !== role) {
+        const correctDashboard = userRole.role === "patient" ? "/dashboard/patient"
+          : userRole.role === "doctor" ? "/dashboard/doctor"
+          : "/dashboard/admin";
+        navigate(correctDashboard);
+      }
+    } catch (error) {
+      console.error("Error verifying user role:", error);
+    }
+  };
+
+  if (isAuthenticated === null) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
+  const SidebarComponent = role === "patient" ? PatientSidebar
+    : role === "doctor" ? DoctorSidebar
+    : AdminSidebar;
+
   return (
-    <div className="min-h-screen bg-background">
-      <nav className="border-b border-border bg-card">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center gap-2">
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <SidebarComponent />
+        
+        <div className="flex-1 flex flex-col">
+          <header className="h-16 border-b border-border bg-card flex items-center px-4">
+            <SidebarTrigger className="mr-4">
+              <Menu className="w-5 h-5" />
+            </SidebarTrigger>
+            
+            <div className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-xl bg-gradient-hero flex items-center justify-center">
                 <Calendar className="w-6 h-6 text-primary-foreground" />
               </div>
@@ -24,30 +90,15 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
                   {role.charAt(0).toUpperCase() + role.slice(1)}
                 </span>
               </div>
-            </Link>
-
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon">
-                <LayoutDashboard className="w-5 h-5" />
-              </Button>
-              <Button variant="ghost" size="icon">
-                <Settings className="w-5 h-5" />
-              </Button>
-              <Link to="/auth">
-                <Button variant="outline" size="sm">
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Logout
-                </Button>
-              </Link>
             </div>
-          </div>
-        </div>
-      </nav>
+          </header>
 
-      <main className="container mx-auto px-4 py-8">
-        {children}
-      </main>
-    </div>
+          <main className="flex-1 container mx-auto px-4 py-8">
+            {children}
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
   );
 };
 
